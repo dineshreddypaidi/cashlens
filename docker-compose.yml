@@ -1,0 +1,13 @@
+services:
+  web:
+    build:
+      context: .              # use root as build context
+      dockerfile: Dockerfile  # Dockerfile is in root
+    container_name: cashlens
+    command: python manage.py runserver 0.0.0.0:8000
+    working_dir: /app
+    volumes:
+      - ./backend:/app        # mount backend into /app
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
