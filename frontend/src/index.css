@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+
+@theme {
+  --color-background : #F9FAFB;
+
+  --color-profit : #22C55E;
+  --color-loss : #EF4444;
+}
