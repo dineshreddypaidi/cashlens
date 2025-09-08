@@ -1,7 +1,7 @@
 from pathlib import Path
 import os
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-0-!ivh(@5-7enk6t5dyb^+(3%(+#yf%9zqauj^cl(&g62()#_*'
 
@@ -37,7 +37,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, "frontend/dist"),],
+        'DIRS': [os.path.join(BASE_DIR.parent, "frontend/dist"),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -50,24 +50,19 @@ TEMPLATES = [
     },
 ]
 
-CORS_ALLOWED_ORIGINS = [
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "http://localhost:8000",
-  "http://127.0.0.1:8000",
-  "http://localhost",
-  "http://127.0.0.1"
-  
-]
+# CORS_ALLOWED_ORIGINS = [
+#   "http://localhost:5173",
+#   "http://localhost:8000",
+#   "http://localhost:8989",
+# ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://localhost",
-    "http://127.0.0.1",
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CSRF_TRUSTED_ORIGINS = [
+#     "http://localhost:5173",
+#     "http://localhost:8000",
+#     "http://localhost:8989",
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -95,7 +90,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'backend/db.sqlite3',
+        'NAME': BASE_DIR.parent / "data" / "db.sqlite3",
     }
 }
 
@@ -117,12 +112,11 @@ AUTH_PASSWORD_VALIDATORS = [
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "frontend/dist/"),
-    os.path.join(BASE_DIR, "frontend/dist/static/"),   
+    BASE_DIR.parent / "frontend" / "dist",
+    BASE_DIR.parent / "frontend" / "dist" / "static",
 ]
 
-STATIC_ROOT = BASE_DIR / "backend/staticfiles"
-
+STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 
 LANGUAGE_CODE = 'en-us'
 

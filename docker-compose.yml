@@ -1,13 +1,17 @@
+
 services:
   web:
     build:
-      context: .              # use root as build context
-      dockerfile: Dockerfile  # Dockerfile is in root
-    container_name: cashlens
-    command: python manage.py runserver 0.0.0.0:8000
-    working_dir: /app
-    volumes:
-      - ./backend:/app        # mount backend into /app
-      - ./data:/app/data
+      context: .
+      dockerfile: Dockerfile
+    container_name: cashlens_web
     ports:
       - "8000:8000"
+    volumes:
+      - ./data:/app/data       # persistent SQLite DB
+      - ./backups:/app/backups # host backups folder
+    environment:
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_PASSWORD: admin
+      DJANGO_SUPERUSER_EMAIL: admin@example.com
+    restart: unless-stopped

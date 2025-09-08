@@ -14,6 +14,7 @@ import json
 
 # transaction_table = mysqldb.use_table("main_transactions")
 
+
 def txn_handler(response):
     main_data = mainmodels.MainData.objects.get(id=1)
     
