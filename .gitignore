@@ -4,3 +4,7 @@ __pycache__
 
 /data
 /backups
+
+.env
+.env.development
+.env.production

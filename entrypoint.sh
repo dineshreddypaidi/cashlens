@@ -3,7 +3,6 @@ set -e
 
 # Ensure DB folder exists
 mkdir -p /app/data
-mkdir -p /app/backups
 
 # Run migrations if DB doesn't exist
 echo "📦 Checking database..."
@@ -34,4 +33,8 @@ done" &
 
 # Start Gunicorn
 echo "🚀 Starting Gunicorn..."
-exec gunicorn backend.wsgi:application --bind 0.0.0.0:8000 --workers 2
+exec gunicorn backend.wsgi:application \
+  --bind 0.0.0.0:8000 \
+  --workers 2 \
+  --access-logfile - \
+  --error-logfile -

@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-0-!ivh(@5-7enk6t5dyb^+(3%(+#yf%9zqauj^cl(&g62()#_*
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*',]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
+    'api',
     
     'corsheaders',
 ]
@@ -37,7 +38,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR.parent, "frontend/dist"),],
+        'DIRS': [os.path.join(BASE_DIR.parent, "frontend/dist/"),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -53,16 +54,18 @@ TEMPLATES = [
 # CORS_ALLOWED_ORIGINS = [
 #   "http://localhost:5173",
 #   "http://localhost:8000",
+#   "http://127.0.0.1:8000",
 #   "http://localhost:8989",
+#   "http://127.0.0.1:8989",
 # ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "http://localhost:5173",
-#     "http://localhost:8000",
-#     "http://localhost:8989",
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "http://localhost:8989",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -116,7 +119,7 @@ STATICFILES_DIRS = [
     BASE_DIR.parent / "frontend" / "dist" / "static",
 ]
 
-STATIC_ROOT = BASE_DIR.parent / "staticfiles"
+STATIC_ROOT = BASE_DIR / "staticfiles/"
 
 LANGUAGE_CODE = 'en-us'
 

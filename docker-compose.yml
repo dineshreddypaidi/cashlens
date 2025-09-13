@@ -1,12 +1,11 @@
+version: "3.9"
 
 services:
-  web:
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: cashlens_web
-    ports:
-      - "8000:8000"
+      dockerfile: Dockerfile.backend   # new dedicated Dockerfile for Django
+    container_name: cashlens_backend
     volumes:
       - ./data:/app/data       # persistent SQLite DB
       - ./backups:/app/backups # host backups folder
@@ -14,4 +13,17 @@ services:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_PASSWORD: admin
       DJANGO_SUPERUSER_EMAIL: admin@example.com
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx    # new dedicated Dockerfile for nginx
+    container_name: cashlens_nginx
+    ports:
+      - "8989:80"   # app will be available at http://localhost
+    depends_on:
+      - backend
     restart: unless-stopped
