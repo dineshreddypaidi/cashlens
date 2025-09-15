@@ -79,20 +79,24 @@ export default function App() {
     ),
     charts: () => (
       <>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3">
-          <Suspense fallback={<div className="p-4 text-profit">Loading charts...</div>}>
-            <MetricGraphs rows={txns} />
-          </Suspense>
-        </div>
-        <hr className="p-2 mb-3 w-4/5 border-t border-neutral-700/40 mx-auto" />
-          <Suspense fallback={<div className="p-4 text-profit">Loading charts...</div>}>
-            <DescGraphs rows={txns} />
-          </Suspense>
+        {txns.length <= 5 ? "Add more txns to get charts" :
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3">
+            <Suspense fallback={<div className="p-4 text-profit">Loading charts...</div>}>
+              <MetricGraphs rows={txns} />
+            </Suspense>
+          </div>
+          <hr className="p-2 mb-3 w-4/5 border-t border-neutral-700/40 mx-auto" />
+            <Suspense fallback={<div className="p-4 text-profit">Loading charts...</div>}>
+              <DescGraphs rows={txns} />
+            </Suspense>
+        </>
+        }
       </>
     ),
-    metrics: ( totals ) => (
+    metrics: () => (
       <div className="grid grid-cols-1 gap-4">
-        <MetricsPanel totals={totals} />
+        <MetricsPanel rows={txns} maindata={data?.maindata}/>
       </div>
     ),
     my_rule: () => (
@@ -140,7 +144,7 @@ export default function App() {
         </div>
 
         <div className="mt-6">
-          {Options[view] ? Options[view]({ totals }) : null}
+          {Options[view] ? Options[view]({ }) : null}
         </div>
 
         <div className="text-xs text-neutral-500 text-center mt-6">&copy; • Dineshreddypaidi</div>
