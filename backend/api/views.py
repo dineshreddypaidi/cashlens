@@ -5,16 +5,6 @@ from django.forms.models import model_to_dict
 
 import json
 
-# from simpleorm.db import Connector
-# from simpleorm.config import *
-
-# mysqldb = Connector(load_from_json("api/config/mysql_db.json")).connect()
-
-# maindata_table = mysqldb.use_table("main_maindata")
-
-# transaction_table = mysqldb.use_table("main_transactions")
-
-
 def txn_handler(response):
     main_data = mainmodels.MainData.objects.get(id=1)
     

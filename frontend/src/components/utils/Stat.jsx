@@ -1,10 +1,6 @@
 import React from 'react';
 import { TrendingUp, Wallet, PiggyBank, TrendingDown, BanknoteArrowDown, BanknoteArrowUp } from 'lucide-react';
 
-// Usage examples:
-// <Stat label="Income" value="$12,345" icon="wallet" color="text-[color:var(--color-income)]" />
-// <Stat label="Expenses" value="$4,200" icon="bending" color="text-[color:var(--color-expense)]" />
-
 const icons = { trending: TrendingUp, wallet: Wallet, piggy: PiggyBank, bending: TrendingDown, debt : BanknoteArrowDown, investment : BanknoteArrowUp };
 
 export default function Stat({ label, value, icon = 'trending', color = 'text-profit' }) {

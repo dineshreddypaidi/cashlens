@@ -6,7 +6,8 @@ export default function Header() {
     try { 
       return sessionStorage.getItem("currency") || "INR"; 
     } catch (e) {
-       return "INR"; // fallback for environments without sessionStorage
+      e;
+      return "INR"; // fallback for environments without sessionStorage
     } });
 
 
