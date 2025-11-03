@@ -6,6 +6,7 @@ const EXPENSE_CATEGORIES = {
   Education : ["Course",],
   Shopping : ["Clothes","Electronics"],
   Utilities: ["Recharge", "Electricity", "Water", "Internet", "Gas"],
+  Investments : ["FD","Stocks","Crypto","Gambling"],
   Entertainment: ["Movies", "Concerts", "Games", "Subscriptions"],
   Debt_Payments : ["credit_card","personal_loan","intrest_paid"],
   MyRule : ["Donated",], //
@@ -19,6 +20,7 @@ const INCOME_CATEGORIES = {
   Interest: ["Savings Account", "Fixed Deposit", "Bonds"],
   Loan : ["personal_loan","credit_usage",],
   Gift: ["Cash Gift", "Voucher", "Prize"],
+  Investment_withdraw: ["FD","Stocks","Crypto","Gambling"],
   Cashback : ["Cashback"],
   My_circle : ["Parents_sent","Friends_sent","relatives_sent"],
   Other: ["Miscellaneous", "Unexpected"]

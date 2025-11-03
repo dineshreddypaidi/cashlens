@@ -8,11 +8,13 @@ import json
 def txn_handler(response):
     main_data = mainmodels.MainData.objects.get(id=1)
     
-    if response.transaction_type == "income":
+    if response.transaction_type == "income": 
         main_data.current_value += response.amount
         main_data.total_income += response.amount
         if response.category == "Loan":
             main_data.total_debt += response.amount
+        if response.category == "Investment_withdraw":
+            main_data.investments -= response.amount
             
     if response.transaction_type == "expense":
         main_data.current_value -= response.amount
@@ -20,6 +22,9 @@ def txn_handler(response):
             main_data.total_debt -= response.amount
         if response.category == "MyRule":
             main_data.contributed_one_perc += response.amount
+        if response.category == "Investments":
+            main_data.investments += response.amount
+            
         
     main_data.save()
     
