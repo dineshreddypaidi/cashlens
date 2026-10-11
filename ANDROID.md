@@ -52,7 +52,8 @@ This needs about 8 GB of tooling, which is why CI is the default path.
 
 **Prerequisites**
 
-- **JDK 17** (Temurin is fine). Gradle 8.11 will not run on JDK 8 or 11.
+- **JDK 21** (Temurin is fine). Capacitor 7 compiles at Java 21; JDK 17 fails
+  with `invalid source release: 21`.
 - **Android Studio**, or just the command-line SDK tools, with the **API 35**
   platform and build-tools installed.
 - `ANDROID_HOME` (or `ANDROID_SDK_ROOT`) pointing at the SDK, or an
@@ -113,6 +114,7 @@ whoever holds it controls updates to the app. When you want it:
 | min SDK | 23 (Android 6.0) |
 | compile / target SDK | 35 |
 | Gradle | 8.11.1 |
+| JDK | 21 |
 | Capacitor | 7 |
 
 **Plugins:** `@capacitor-community/sqlite` (storage), `@capacitor/app`
