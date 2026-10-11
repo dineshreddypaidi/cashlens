@@ -1,10 +1,10 @@
 name: Android APK
 
 on:
+  # Build on every branch: the point of this workflow is to hand you an APK,
+  # and waiting for a merge to main to get one is not useful.
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: ['**']
   workflow_dispatch:
 
 jobs:
