@@ -11,6 +11,8 @@ export default defineConfig({
   base: "/",
   plugins: [react(), tailwindcss()],
   server: {
+    port: 5180,
+    strictPort: true,
     proxy: {
       '/api': 'http://localhost:8000', // only for local dev
     },

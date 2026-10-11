@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { X, Plus, CreditCard, DollarSign } from "lucide-react";
 
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "./utils/AddRecordOps";
+import useBackButton from "../native/useBackButton";
+
+const FIELD_CLASS =
+  "w-full min-w-0 min-h-11 rounded-md border border-neutral-200 px-3 py-2 text-base focus:ring-2 focus:ring-blue-300";
 
 export default function AddRecordModal({ onAdd, defaultDate }) {
   const [open, setOpen] = useState(false);
@@ -15,10 +19,11 @@ export default function AddRecordModal({ onAdd, defaultDate }) {
   return (
     <div className="relative">
       <button
+        type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-neutral-900 text-white font-semibold shadow hover:opacity-95"
+        className="inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2 rounded-lg bg-neutral-900 text-white font-semibold shadow hover:opacity-95"
       >
         <Plus className="w-4 h-4" /> Add
       </button>
@@ -46,14 +51,22 @@ function Modal({ children, onClose }) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
+  // Android hardware back closes the sheet instead of exiting the app.
+  useBackButton(onClose);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-0 sm:px-4 py-0 sm:py-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-record-title"
+    >
       <div
         className="absolute inset-0 bg-black/45 backdrop-blur-sm"
         onClick={onClose}
       />
       <div
-        className="relative z-10 w-full max-w-2xl rounded-2xl bg-white/95 shadow-2xl ring-1 ring-black/5 p-6"
+        className="relative z-10 w-full max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-2xl sm:rounded-2xl bg-white/95 shadow-2xl ring-1 ring-black/5 p-4 sm:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -76,6 +89,7 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
   const [category, setCategory] = useState(Object.keys(categories)[0]);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [amountError, setAmountError] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(() => {
     if (!defaultDate) return new Date().toISOString().slice(0, 10);
@@ -94,6 +108,7 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
     setCategory(Object.keys(EXPENSE_CATEGORIES)[0]);
     setDescription("");
     setAmount("");
+    setAmountError("");
     setNote("");
     setDate(new Date().toISOString().slice(0, 10));
     setTransactionType("expense");
@@ -104,9 +119,10 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
 
     const parsedAmount = Number(String(amount).replace(/,/g, "")) || 0;
     if (!parsedAmount || parsedAmount <= 0) {
-      alert("Enter a valid amount greater than 0");
+      setAmountError("Enter a valid amount greater than 0");
       return;
     }
+    setAmountError("");
 
     const payload = {
       transaction_type: transactionType,
@@ -126,35 +142,36 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* header */}
       <div className="flex items-start justify-between">
-        <div className="flex-1 flex rounded-2xl bg-neutral-100 p-1 border border-neutral-200">
+        <div id="add-record-title" className="flex-1 min-w-0 flex rounded-2xl bg-neutral-100 p-1 border border-neutral-200">
           <button
             type="button"
             onClick={() => setTransactionType("expense")}
-            className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-0 min-h-11 px-3 py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-2 ${
               transactionType === "expense"
                 ? "bg-loss text-neutral-900"
                 : "text-neutral-600 hover:bg-loss/20 cursor-pointer"
             }`}
           >
-            <CreditCard className="w-4 h-4" /> Expense
+            <CreditCard className="w-4 h-4 shrink-0" /> <span className="truncate">Expense</span>
           </button>
           <button
             type="button"
             onClick={() => setTransactionType("income")}
-            className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-0 min-h-11 px-3 py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-2 ${
               transactionType === "income"
                 ? "bg-profit text-neutral-900"
                 : "text-neutral-600 hover:bg-profit/20 cursor-pointer"
             }`}
           >
-            <DollarSign className="w-4 h-4" /> Income
+            <DollarSign className="w-4 h-4 shrink-0" /> <span className="truncate">Income</span>
           </button>
         </div>
 
         <button
           type="button"
           onClick={onClose}
-          className="ml-3 p-2 rounded-md hover:bg-loss/50 cursor-pointer "
+          aria-label="Close"
+          className="ml-3 shrink-0 p-2 rounded-md hover:bg-loss/50 cursor-pointer "
         >
           <X />
         </button>
@@ -172,7 +189,7 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
                 setCategory(e.target.value);
                 setDescription(""); // reset description when category changes
               }}
-              className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-300"
+              className={FIELD_CLASS}
             >
               {Object.keys(categories).map((c) => (
                 <option key={c} value={c}>
@@ -190,7 +207,7 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
                 ref={firstInputRef}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-300"
+                className={FIELD_CLASS}
               >
                 <option value="">Select description</option>
                 {categories[category].map((sub) => (
@@ -209,11 +226,21 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
             <span className="mb-1 font-medium">Amount</span>
             <input
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                setAmount(e.target.value);
+                if (amountError) setAmountError("");
+              }}
               inputMode="decimal"
-              className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-300"
+              aria-invalid={amountError ? "true" : undefined}
+              aria-describedby={amountError ? "amount-error" : undefined}
+              className={FIELD_CLASS}
               placeholder="0.00"
             />
+            {amountError && (
+              <span id="amount-error" className="mt-1 text-xs text-loss">
+                {amountError}
+              </span>
+            )}
           </label>
 
           {/* Date */}
@@ -223,7 +250,7 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-300"
+              className={FIELD_CLASS}
             />
           </label>
 
@@ -233,7 +260,7 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
             <input
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-300"
+              className={FIELD_CLASS}
               placeholder="Any extra info..."
             />
           </label>
@@ -241,17 +268,17 @@ function AddRecordForm({ onAdd, defaultDate, onClose }) {
       </div>
 
       {/* actions */}
-      <div className="flex justify-end gap-3 pt-2">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2">
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 rounded-md bg-loss/70 hover:bg-loss cursor-pointer"
+          className="w-full sm:w-auto min-h-11 px-4 py-2 rounded-md bg-loss/70 hover:bg-loss cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-3 rounded-md bg-emerald-600 text-white font-semibold hover:bg-emerald-700 cursor-pointer"
+          className="w-full sm:w-auto min-h-11 px-4 py-2 rounded-md bg-emerald-600 text-white font-semibold hover:bg-emerald-700 cursor-pointer"
         >
           Add record
         </button>

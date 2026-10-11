@@ -7,9 +7,17 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:rules": "node src/data/adapters/txnRules.test.mjs",
+    "android:sync": "vite build && cap sync android",
+    "android:apk": "vite build && cap sync android && cd android && gradlew assembleDebug"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^7.0.3",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/core": "^7.6.9",
+    "@capacitor/keyboard": "^7.0.6",
+    "@capacitor/status-bar": "^7.0.6",
     "@tailwindcss/vite": "^4.1.12",
     "axios": "^1.11.0",
     "framer-motion": "^12.23.12",
@@ -20,6 +28,8 @@
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/cli": "^7.6.9",
     "@eslint/js": "^9.33.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",

@@ -1,9 +1,8 @@
-import api from "../lib/api"; // axios instance with baseURL
+import { addTxn } from "./adapters";
 
 export default async function postTxn(record) {
   try {
-    const res = await api.post("txn/add/", record);
-    return res.data;
+    return await addTxn(record);
   } catch (err) {
     console.error("Failed to add transaction:", err);
     throw err;

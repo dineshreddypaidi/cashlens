@@ -1,0 +1,16 @@
+{
+  "appId": "in.cashlens.app",
+  "appName": "CashLens",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "CapacitorSQLite": {
+      "androidIsEncryption": false
+    },
+    "Keyboard": {
+      "resize": "body"
+    }
+  }
+}

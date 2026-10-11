@@ -1,3 +1,5 @@
+import { getRate } from "../data/adapters";
+
 const CURRENCY_LOCALE_MAP = {
   USD: "en-US",
   INR: "en-IN",
@@ -12,20 +14,30 @@ const guessLocaleForCurrency = (currencyCode) => {
   return CURRENCY_LOCALE_MAP[code] || "en-IN";
 };
 
-let exchange_rate_usdinr = 87.63;
+const FALLBACK_USDINR = 87.63;
 
-const api_key = "d649263e33d299c04cc049a2";
+let exchange_rate_usdinr = FALLBACK_USDINR;
+let ratePromise = null;
 
-fetch(`https://v6.exchangerate-api.com/v6/${api_key}/pair/USD/INR`)
-  .then((res) => res.json())
-  .then((data) => {
-    if (data?.conversion_rate) {
-      exchange_rate_usdinr = data.conversion_rate;
-    }
-  })
-  .catch((err) => {
-    console.error("Error fetching rate, using fallback:", err);
-  });
+/**
+ * Fetches the USD/INR rate once per session through the active adapter (the
+ * backend proxies it, so no API key ships to the client). Resolves either way:
+ * on failure the fallback above stays in place, which is also the normal path
+ * for the offline Android build.
+ */
+export function fetchRate() {
+  if (!ratePromise) {
+    ratePromise = getRate()
+      .then((rate) => {
+        if (Number.isFinite(rate) && rate > 0) {
+          exchange_rate_usdinr = rate;
+        }
+        return exchange_rate_usdinr;
+      })
+      .catch(() => exchange_rate_usdinr);
+  }
+  return ratePromise;
+}
 
 export const fmtCurrency = (n, currency) => {
   const safeCurrency = isValidCurrency(currency)
@@ -33,9 +45,13 @@ export const fmtCurrency = (n, currency) => {
     : "INR";
   const locale = guessLocaleForCurrency(safeCurrency);
 
+  // Coerce before any arithmetic: an undefined amount is routine during load
+  // and used to divide through to NaN, printing "$NaN".
+  let num = Number(n) || 0;
+
   let fractions = 0;
   if (safeCurrency === "USD") {
-    n /= exchange_rate_usdinr;
+    num /= exchange_rate_usdinr;
     fractions = 2;
   }
 
@@ -44,13 +60,29 @@ export const fmtCurrency = (n, currency) => {
       style: "currency",
       currency: safeCurrency,
       maximumFractionDigits: fractions,
-    }).format(n ?? 0);
-  } catch (err) {
-    err;
+    }).format(num);
+  } catch {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
       maximumFractionDigits: 0,
-    }).format(n ?? 0);
+    }).format(num);
+  }
+};
+
+/**
+ * Short axis labels. Full INR amounts are too wide for a chart gutter on a
+ * phone and get clipped, so ticks use compact notation (1.2Cr, 75L) while
+ * tooltips keep the exact figure.
+ */
+export const fmtCompact = (n) => {
+  const num = Number(n) || 0;
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(num);
+  } catch {
+    return String(num);
   }
 };

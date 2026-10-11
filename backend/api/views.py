@@ -4,6 +4,12 @@ from main import models as mainmodels
 from django.forms.models import model_to_dict
 
 import json
+import os
+import time
+import urllib.request
+import urllib.error
+
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 def txn_handler(response):
     main_data = mainmodels.MainData.objects.get(id=1)
@@ -50,6 +56,7 @@ def txn_add(request):
             "error" : "get method not allowed"
         },status = 401)
 
+@ensure_csrf_cookie
 def mainview(request):
     if request.method == "GET":
         maindata, created = mainmodels.MainData.objects.get_or_create(
@@ -85,3 +92,62 @@ def txnsrange(request,start_date,end_date):
         return JsonResponse({
             "error" : "post not allowed"
         },status = 401)
+
+
+# --- exchange rate proxy -------------------------------------------------
+# The API key stays server side. Cached in-process so a page load does not
+# hit the upstream every time.
+FALLBACK_USDINR = 87.63
+RATE_TTL_SECONDS = 6 * 60 * 60
+
+_rate_cache = {"rate": None, "fetched_at": 0.0}
+
+
+def _fetch_usdinr():
+    api_key = os.environ.get("EXCHANGE_RATE_API_KEY")
+    if not api_key:
+        return None
+
+    url = "https://v6.exchangerate-api.com/v6/%s/pair/USD/INR" % api_key
+    try:
+        with urllib.request.urlopen(url, timeout=8) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, ValueError, TimeoutError) as err:
+        print("exchange rate fetch failed:", err)
+        return None
+
+    rate = payload.get("conversion_rate")
+    try:
+        rate = float(rate)
+    except (TypeError, ValueError):
+        return None
+
+    return rate if rate > 0 else None
+
+
+def exchange_rate(request):
+    if request.method != "GET":
+        return JsonResponse({"error": "only get allowed"}, status=405)
+
+    now = time.time()
+    fresh = (
+        _rate_cache["rate"] is not None
+        and (now - _rate_cache["fetched_at"]) < RATE_TTL_SECONDS
+    )
+
+    if not fresh:
+        rate = _fetch_usdinr()
+        if rate is not None:
+            _rate_cache["rate"] = rate
+            _rate_cache["fetched_at"] = now
+
+    rate = _rate_cache["rate"]
+    return JsonResponse(
+        {
+            "conversion_rate": rate if rate is not None else FALLBACK_USDINR,
+            "base": "USD",
+            "target": "INR",
+            "fallback": rate is None,
+        },
+        status=200,
+    )

@@ -1,5 +1,7 @@
 import React from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import ChartCard, { ChartEmpty } from "./ChartCard";
+import useMediaQuery, { SM_UP } from "../../utils/useMediaQuery";
 
 const RADIAN = Math.PI / 180;
 
@@ -38,129 +40,59 @@ function getColor(name) {
   return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
-export function CashflowPie( {usedata} ) {
+/**
+ * One pie, sized and labelled for the current breakpoint. Slice labels are
+ * dropped below `sm`, where they overlap into mush on a crowded pie.
+ */
+function Pie1({ title, data, label }) {
+  const smUp = useMediaQuery(SM_UP);
+
+  if (!data?.length) return <ChartEmpty title={title} />;
+
+  return (
+    <ChartCard title={title}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={smUp ? label : false}
+            outerRadius="80%"
+            paddingAngle={2}
+            dataKey="value"
+          >
+            {data.map((entry) => (
+              <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: smUp ? 14 : 12 }} />
+        </PieChart>
+      </ResponsiveContainer>
+    </ChartCard>
+  );
+}
+
+export function CashflowPie({ usedata }) {
   const data = [
-    { name: "Income", value: usedata.income },
-    { name: "Expenses", value: usedata.expenses },
-  ];
+    { name: "Income", value: Number(usedata?.income) || 0 },
+    { name: "Expenses", value: Number(usedata?.expenses) || 0 },
+  ].filter((d) => d.value > 0);
 
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-4">
-      <div className="text-sm text-neutral-600 mb-2">Cashflow - %</div>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={renderCustomizedLabel}
-              outerRadius="95%"
-              paddingAngle={2}
-              dataKey="value"
-            >
-              {data.map((entry, idx) => (
-                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
+  return <Pie1 title="Cashflow - %" data={data} label={renderCustomizedLabel} />;
 }
 
-export function IncomeSourcesPie( {data} ) {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-4">
-      <div className="text-sm text-neutral-600 mb-2">Income</div>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={renderCustomizedLabel}
-              outerRadius="95%"
-              paddingAngle={2}
-              dataKey="value"
-            >
-              {data.map((entry, idx) => (
-                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
+export function IncomeSourcesPie({ data }) {
+  return <Pie1 title="Income" data={data} label={renderCustomizedLabel} />;
 }
 
-
-export function ExpensesPie( { data } ) {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-4">
-      <div className="text-sm text-neutral-600 mb-2">Expenses</div>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label
-              outerRadius="80%"
-              paddingAngle={3}
-              dataKey="value"
-            >
-              {data.map((entry, idx) => (
-                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
+export function ExpensesPie({ data }) {
+  return <Pie1 title="Expenses" data={data} label />;
 }
 
-export function DescriptionPie( { data, type, description } ) {
-  if (data.length < 1) { return "No data"; }
-  return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-4">
-      <div className="text-sm text-neutral-600 mb-2">{type} {type === "Income" ? "from" : "for"} {description}</div>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label
-              outerRadius="80%"
-              paddingAngle={3}
-              dataKey="value"
-            >
-              {data.map((entry, idx) => (
-                <Cell key={`cell-${entry.name}`} fill={getColor(entry.name)} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
+export function DescriptionPie({ data, type, description }) {
+  const title = `${type} ${type === "Income" ? "from" : "for"} ${description}`;
+  return <Pie1 title={title} data={data} label />;
 }

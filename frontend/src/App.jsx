@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 
 import { useCurrency } from "./components/utils/CurrencyContext";
 
@@ -22,6 +22,17 @@ import postTxn from './data/postData';
 
 import { totalGroup } from './components/charts/utils/groupers';
 
+const MetricGraphs = lazy(() => import("./components/MetricGraphs.jsx"));
+const DescGraphs = lazy(() => import("./components/DescGraphs.jsx"));
+
+function Notice({ children }) {
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-center text-sm text-neutral-500">
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
 
   const { currency } = useCurrency();
@@ -30,41 +41,38 @@ export default function App() {
   const startDefault = new Date(today.getFullYear(), today.getMonth(), 1).toLocaleDateString("en-CA");
   const endDefault =  today.toISOString().slice(0, 10);
 
-  const [txnAdded , setTxnAdded] = useState(false);
+  // A counter, not a flag: a boolean stops changing after the first add, so
+  // later adds would never retrigger the fetch.
+  const [txnVersion, setTxnVersion] = useState(0);
 
   const [range, setRange] = useState({ start: startDefault, end: endDefault });
-  const { data, transactions, error } = useMainData(range,txnAdded);
+  const { data, transactions, error, loading } = useMainData(range, txnVersion);
 
   const [txns, setTxns] = useState([]);
-  const [totals, setTotals] = useState([]);
 
   const [view, setView] = useState('transactions');
-
-  const MetricGraphs = lazy(() => import("./components/MetricGraphs.jsx"));
-  const DescGraphs = lazy(() => import("./components/DescGraphs.jsx"));
 
   useEffect(() => {
     if (transactions) {
       setTxns(transactions);
     }
-    setTotals(totalGroup(txns))
-  }, [data, transactions, txns]);
+  }, [transactions]);
+
+  // Derived, so totals can never lag a render behind txns.
+  const totals = useMemo(() => totalGroup(txns), [txns]);
 
   async function addRecord(record) {
-    setTxnAdded(false);
+    const optimisticId = txns.length ? Math.max(...txns.map((p) => p.id)) + 1 : 1;
     setTxns((prev) => [
-      { ...record,  id: prev.length ? Math.max(...prev.map((p) => p.id)) + 1 : 1},
+      { ...record, id: optimisticId, _optimistic: true },
       ...prev,
     ]);
 
     try {
-      const saved = await postTxn(record);
-      setTxnAdded(true);
-      setTxns((prev) =>
-        prev.map((txn) =>
-          txn._optimistic ? { ...saved,} : txn
-        )
-      );
+      // The add endpoint returns only a message, so there is nothing to merge
+      // in; bumping the version refetches and replaces the optimistic row.
+      await postTxn(record);
+      setTxnVersion((v) => v + 1);
     } catch (err) {
       setTxns((prev) => prev.filter((txn) => txn._optimistic !== true));
       return err;
@@ -74,14 +82,14 @@ export default function App() {
   const Options = {
     transactions: () => (
       <div className="grid grid-cols-1 gap-4">
-        <TransactionsTable rows={txns} />
+        <TransactionsTable rows={txns} loading={loading} />
       </div>
     ),
     charts: () => (
       <>
-        {txns.length <= 5 ? "Add more txns to get charts" :
+        {txns.length <= 5 ? <Notice>Add more txns to get charts</Notice> :
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-3">
             <Suspense fallback={<div className="p-4 text-profit">Loading charts...</div>}>
               <MetricGraphs rows={txns} />
             </Suspense>
@@ -109,32 +117,37 @@ export default function App() {
   if (error) return <div className="text-loss text-center">Error: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-background text-neutral-900">
+    <div className="min-h-dvh overflow-x-hidden bg-background text-neutral-900 pb-[env(safe-area-inset-bottom)]">
       <Header />
-      <main className="max-w-6xl mx-auto px-4 py-6">
-        <div className="space-y-6">
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4">
+      <main className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+        <div className="space-y-4 sm:space-y-6">
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             <Stat label="Current Value" value={fmtCurrency(data?.maindata?.current_value, currency)} icon="piggy" color= {data?.maindata?.current_value > 0 ? 'text-profit' : 'text-loss'} />
             <Stat label="Investments" value={fmtCurrency(data?.maindata?.investments, currency)} icon="investment" color="text-profit" />
-            <Stat label="Debt" value={fmtCurrency(data?.maindata?.total_debt, currency)} icon="debt" color="text-loss" />
+            <div className="col-span-2 sm:col-span-1">
+              <Stat label="Debt" value={fmtCurrency(data?.maindata?.total_debt, currency)} icon="debt" color="text-loss" />
+            </div>
           </div>
 
           <hr className="border-1 text-neutral-700/40" />
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-4">
-            <div className="flex items-center gap-3">
-              <AddRecordModal onAdd={addRecord} />
+          <div className="flex flex-wrap items-center gap-3 mt-4">
+            <AddRecordModal onAdd={addRecord} />
+
+            {/* min-w forces the tab bar onto its own line rather than
+                clipping its last tab when the row runs out of room. */}
+            <div className="flex-1 min-w-[200px]">
               <SegmentedControl value={view} onChange={setView} />
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="w-full sm:w-auto sm:ml-auto flex items-center gap-3">
               <DateRange start={range.start} end={range.end} onChange={setRange} />
             </div>
 
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <Stat label="Income" value={fmtCurrency(totals.income, currency)} icon="wallet" color="text-profit" />
             <Stat label="Expenses" value={fmtCurrency(totals.expenses, currency)} icon="bending" color="text-loss" />
           </div>

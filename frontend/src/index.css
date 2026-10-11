@@ -7,3 +7,26 @@
   --color-profit : #22C55E;
   --color-loss : #EF4444;
 }
+
+/* Base rules. No colours are defined below this line. */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* Stops the whole page rubber-banding behind scrollable panels in the
+     Android WebView. Inner lists opt back in with `overscroll-contain`. */
+  overscroll-behavior-y: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -17,7 +17,7 @@ export default function MetricCard({ label, value, info, icon, type = "neutral" 
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.3 }}
-      className={`rounded-2xl shadow-md border bg-gradient-to-br ${theme} backdrop-blur-sm p-6`}
+      className={`h-full rounded-2xl shadow-md border bg-gradient-to-br ${theme} backdrop-blur-sm p-4 sm:p-6`}
     >
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium opacity-80">{label}</span>
@@ -35,7 +35,7 @@ export default function MetricCard({ label, value, info, icon, type = "neutral" 
         initial={{ scale: 0.95 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="mt-4 text-3xl font-bold tracking-tight"
+        className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight truncate tabular-nums"
       >
         {value}
       </motion.div>

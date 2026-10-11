@@ -1,5 +1,7 @@
 import React from 'react';
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import ChartCard from './ChartCard';
+import { fmtCompact } from '../../utils/format';
 
 function formatShortDate(d) {
   if (!d && d !== 0) return "";
@@ -10,20 +12,17 @@ function formatShortDate(d) {
 
 export function DailyCashflowChart({ data }) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-4">
-      <div className="text-sm text-neutral-600 mb-2">Daily Cashflow</div>
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ left: 10, right: 10, top: 10, bottom: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" tickFormatter={formatShortDate} />
-            <YAxis domain={["auto", "auto"]} />
-            <Tooltip />
-            <Line type="monotone" dataKey="Income" stroke="#16a34a" strokeWidth={2} />
-            <Line type="monotone" dataKey="Expenses" stroke="#ef4444" strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+    <ChartCard title="Daily Cashflow">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ left: 10, right: 10, top: 10, bottom: 10 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" tickFormatter={formatShortDate} tick={{ fontSize: 11 }} minTickGap={16} />
+          <YAxis domain={["auto", "auto"]} width={52} tick={{ fontSize: 11 }} tickFormatter={fmtCompact} />
+          <Tooltip />
+          <Line type="monotone" dataKey="Income" stroke="#16a34a" strokeWidth={2} />
+          <Line type="monotone" dataKey="Expenses" stroke="#ef4444" strokeWidth={2} />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartCard>
   );
 }
