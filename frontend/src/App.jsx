@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 
-import { useCurrency } from "./components/utils/CurrencyContext";
+import { useCurrency } from "./components/utils/useCurrency";
 
 import { fmtCurrency } from './utils/format';
 

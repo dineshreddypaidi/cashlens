@@ -1,9 +1,7 @@
-// CurrencyContext.jsx
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
+import { CurrencyContext } from "./useCurrency";
 import { fetchRate } from "../../utils/format";
-
-const CurrencyContext = createContext();
 
 function readStored() {
   try {
@@ -46,9 +44,4 @@ export function CurrencyProvider({ children }) {
       {children}
     </CurrencyContext.Provider>
   );
-}
-
-// easy hook
-export function useCurrency() {
-  return useContext(CurrencyContext);
 }

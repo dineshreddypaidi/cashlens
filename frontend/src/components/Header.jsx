@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useCurrency } from "./utils/CurrencyContext";
+import { useCurrency } from "./utils/useCurrency";
 
 const currencySymbols = {
   INR: "₹",

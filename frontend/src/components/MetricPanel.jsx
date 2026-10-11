@@ -1,6 +1,6 @@
 import MetricCard from "./utils/MetricCard";
 import { fmtCurrency } from "../utils/format";
-import { useCurrency } from "./utils/CurrencyContext";
+import { useCurrency } from "./utils/useCurrency";
 import { Banknote } from "lucide-react";
 
 function MetricCalculation(rows, maindata) {

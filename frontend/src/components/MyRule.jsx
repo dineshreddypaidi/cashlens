@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { HeartHandshake, ShieldCheck} from 'lucide-react';
 import { fmtCurrency } from '../utils/format';
-import { useCurrency } from "./utils/CurrencyContext";
+import { useCurrency } from "./utils/useCurrency";
 
 export default function MyRule({income = 0,contributed = 0,percent = 1,}) {
     const { currency } = useCurrency();

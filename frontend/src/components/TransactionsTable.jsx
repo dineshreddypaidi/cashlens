@@ -1,7 +1,7 @@
 import React from "react";
 import { Tag } from "lucide-react";
 import { fmtCurrency } from "../utils/format";
-import { useCurrency } from "./utils/CurrencyContext";
+import { useCurrency } from "./utils/useCurrency";
 
 function formatDate(d) {
   try {
