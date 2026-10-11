@@ -109,7 +109,7 @@ export default function App() {
     ),
     my_rule: () => (
       <div className="grid grid-cols-1 gap-4">
-        <MyRule income={(data?.maindata?.total_income * 0.8)} contributed={data?.maindata?.contributed_one_perc}/>
+        <MyRule income={data?.maindata?.total_income} contributed={data?.maindata?.contributed_one_perc}/>
       </div>
     ),
   };
