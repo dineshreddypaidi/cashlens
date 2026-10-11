@@ -31,8 +31,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # No setup-android step: the ubuntu runner image already ships the
+      # Android SDK with ANDROID_HOME set. The action's default package list
+      # includes the long-removed 'tools' package and fails.
 
       - name: Install dependencies
         run: npm ci
