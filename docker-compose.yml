@@ -13,6 +13,8 @@ services:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_PASSWORD: admin
       DJANGO_SUPERUSER_EMAIL: admin@example.com
+      # Read from the host .env; the frontend never sees this value.
+      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY:-}
     expose:
       - "8000"
     restart: unless-stopped

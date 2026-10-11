@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { HeartHandshake, PiggyBank, ShieldCheck} from 'lucide-react';
+import { HeartHandshake, ShieldCheck} from 'lucide-react';
 import { fmtCurrency } from '../utils/format';
-import { useCurrency } from "./utils/CurrencyContext";
+import { useCurrency } from "./utils/useCurrency";
 
 export default function MyRule({income = 0,contributed = 0,percent = 1,}) {
     const { currency } = useCurrency();
@@ -21,32 +21,32 @@ export default function MyRule({income = 0,contributed = 0,percent = 1,}) {
     }, [income, contributed, percent]);
 
    return (
-    <div className="bg-zinc-200/40 border border-neutral-200 rounded-2xl p-5 shadow-sm">
+    <div className="bg-zinc-200/40 border border-neutral-200 rounded-2xl p-4 sm:p-5 shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-neutral-100 border border-neutral-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="shrink-0 p-2 rounded-xl bg-neutral-100 border border-neutral-200">
             <HeartHandshake className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="text-base font-semibold text-neutral-900">1% Rule</div>
             <div className="text-xs text-neutral-500">Donate {percent}% of total earnings</div>
           </div>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs border border-neutral-200 bg-neutral-50">
-          <ShieldCheck className="w-4 h-4" />
+        <div className="self-start sm:self-auto shrink-0 inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs border border-neutral-200 bg-neutral-50 whitespace-nowrap">
+          <ShieldCheck className="w-4 h-4 shrink-0" />
           <span>My way of Social service</span>
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 md:items-center gap-5">
         {/* Progress donut */}
         <ProgressDonut progress={progress} label={`${Math.round(progress)}%`} />
 
         {/* Numbers + actions */}
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
             <InfoTile label="Income" value={fmtCurrency(income, currency)} />
             <InfoTile label={`${percent}% Target`} value={fmtCurrency(target, currency)} />
             <InfoTile label="Contributed" value={fmtCurrency(contributed, currency)} accent="text-profit" />
@@ -60,9 +60,9 @@ export default function MyRule({income = 0,contributed = 0,percent = 1,}) {
 
 function InfoTile({ label, value, accent }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-3">
-      <div className="text-xs text-neutral-500">{label}</div>
-      <div className={`mt-1 text-base font-semibold ${accent || ''}`}>{value}</div>
+    <div className="min-w-0 rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+      <div className="text-xs text-neutral-500 truncate">{label}</div>
+      <div title={value} className={`mt-1 text-base font-semibold truncate tabular-nums ${accent || ''}`}>{value}</div>
     </div>
   );
 }
@@ -77,17 +77,11 @@ function ProgressDonut({ progress = 0, label = '' }) {
 
   return (
     <div className="flex items-center justify-center">
-      <svg width={size} height={size} className="block">
-        <defs>
-          <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="currentColor" />
-            <stop offset="100%" stopColor="currentColor" />
-          </linearGradient>
-        </defs>
-
+      {/* viewBox (not width/height) is what lets this scale down on a phone. */}
+      <svg viewBox={`0 0 ${size} ${size}`} className="block w-32 h-32 sm:w-36 sm:h-36" role="img" aria-label={`${label} of target`}>
         {/* Track */}
         <circle cx={size / 2} cy={size / 2} r={r} stroke="#E5E7EB" strokeWidth={stroke} fill="none" />
-        {/* Progress */}
+        {/* Progress — rotated so the arc starts at 12 o'clock. */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -98,7 +92,8 @@ function ProgressDonut({ progress = 0, label = '' }) {
           strokeDasharray={c}
           strokeDashoffset={offset}
           fill="none"
-          className="text-[color:var(--color-savings)] transition-all duration-500"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          className="text-profit transition-all duration-500"
         />
 
         <g>

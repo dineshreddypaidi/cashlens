@@ -1,24 +1,41 @@
-// CurrencyContext.jsx
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
-const CurrencyContext = createContext();
+import { CurrencyContext } from "./useCurrency";
+import { fetchRate } from "../../utils/format";
+
+function readStored() {
+  try {
+    return sessionStorage.getItem("currency") || "INR";
+  } catch {
+    return "INR"; // environments without sessionStorage
+  }
+}
 
 export function CurrencyProvider({ children }) {
-  const [currency, setCurrency] = useState(() => {
-    return sessionStorage.getItem("currency") || "INR";
-  });
+  const [currency, setCurrency] = useState(readStored);
+
+  // The live USD/INR rate lands asynchronously into a module-level value in
+  // format.js. Flipping state here re-renders the tree below so every
+  // fmtCurrency() call picks it up instead of keeping the fallback forever.
+  const [, setRateLoaded] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const stored = sessionStorage.getItem("currency") || "INR";
-      if (stored !== currency) setCurrency(stored);
-    }, 500);
-    return () => clearInterval(interval);
-  }, [currency]);
+    let mounted = true;
+    fetchRate().then(() => {
+      if (mounted) setRateLoaded(true);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // sync when user changes currency in-app
   const updateCurrency = (newCurrency) => {
-    sessionStorage.setItem("currency", newCurrency);
+    try {
+      sessionStorage.setItem("currency", newCurrency);
+    } catch {
+      // ignore: persistence is best-effort
+    }
     setCurrency(newCurrency);
   };
 
@@ -27,9 +44,4 @@ export function CurrencyProvider({ children }) {
       {children}
     </CurrencyContext.Provider>
   );
-}
-
-// easy hook
-export function useCurrency() {
-  return useContext(CurrencyContext);
 }

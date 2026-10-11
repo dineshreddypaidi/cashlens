@@ -20,7 +20,7 @@ export default function DescGraphs( { rows } ) {
             expenseCategory={expenseCategory}
             setExpenseCategory={setExpenseCategory}
         />
-            <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3">
                 <DescriptionPie data={income_desc} type={"Income"} description={incomeCategory} />
                 <DescriptionPie data={expense_desc} type={"Expense"} description={expenseCategory} />
             </div>
